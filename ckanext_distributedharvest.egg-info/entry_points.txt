@@ -1,0 +1,8 @@
+
+        [ckan.plugins] 
+        distributed_harvest=ckanext.distributedharvest.plugin:DistributedHarvest
+		
+		[paste.paster_command]
+		distributed-harvester = ckanext.distributedharvest.commands.harvester:DistributedHarvester
+
+	
