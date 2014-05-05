@@ -42,13 +42,15 @@ Installation
      
    *Wichtig:* Es sind keine weiteren Python-Module fuer die Ausfuehrung dieses Plugins noetig.
        
-4. Folgende Plugins muessen in der Konfigurationsdatei (development.ini) angegeben werden, um diese zu aktivieren::
+3. Folgende Plugins muessen in der Konfigurationsdatei (development.ini) angegeben werden, um diese zu aktivieren::
 
       ckan.plugins = harvest distributed_harvest
 
-5. Ausserdem muss die Message Broker Software auf RabbitMQ gesetzt werden::
+4. Ausserdem muss die Message Broker Software auf RabbitMQ gesetzt werden::
 
     ckan.harvest.mq.type = ampq
+
+
 
 
 Kommandozeilenbefehle
@@ -84,11 +86,14 @@ Die folgenden Befehle koennen von der Kommandozeile unter vorhergehenden Angabe 
       paster distributed-harvester run_distributed_harvester #1234 test-titel --config=../ckan/development.ini
 
 
+
+
 Authorization
 =============
 
 Das Plugin ckanext-distributedharvest setzt dieselben Zugriffabfragen 
 wie ckanext-harvest ein.
+
 
 
 Harvester-Jobs ausfuehren
@@ -115,12 +120,11 @@ Fuer alle anderen Harvester muessen diese Kommandos (mit neuem Namen fuer ``harv
 in neunen Konsolen ausgefuehrt werden, damit diese verteilt verarbeitet werden koennen.
 
 
+
 Ueber dieselben Kommandos lassen sich auch die jeweiligen Konsumenten mit individuellen 
 Namen für die einzelnen Queues, Routing-Keys und Exchanges definieren:
       paster --plugin=ckanext-distributedharvest distributed-harvester distributed_gather_consumer gather_queue_harvesterTest gather_routing_key_harvesterTest --config=development.ini
-
       paster --plugin=ckanext-distributedharvest distributed-harvester distributed_fetch_consumer fetch_queue_harvesterTest fetch_routing_key_harvesterTest --config=development.ini
-
       paster --plugin=ckanext-distributedharvest distributed-harvester run_distributed_harvester sourcetest gather_routing_key_harvesterTest fetch_routing_key_harvesterTest --config=development.ini
   
 
