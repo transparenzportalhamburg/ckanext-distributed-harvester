@@ -122,7 +122,7 @@ in neunen Konsolen ausgefuehrt werden, damit diese verteilt verarbeitet werden k
 
 
 Ueber dieselben Kommandos lassen sich auch die jeweiligen Konsumenten mit individuellen 
-Namen für die einzelnen Queues, Routing-Keys und Exchanges definieren:
+Namen für die einzelnen Queues, Routing-Keys und Exchanges definieren::
       paster --plugin=ckanext-distributedharvest distributed-harvester distributed_gather_consumer gather_queue_harvesterTest gather_routing_key_harvesterTest --config=development.ini
       paster --plugin=ckanext-distributedharvest distributed-harvester distributed_fetch_consumer fetch_queue_harvesterTest fetch_routing_key_harvesterTest --config=development.ini
       paster --plugin=ckanext-distributedharvest distributed-harvester run_distributed_harvester sourcetest gather_routing_key_harvesterTest fetch_routing_key_harvesterTest --config=development.ini
