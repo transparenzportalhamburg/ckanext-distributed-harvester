@@ -25,39 +25,49 @@ HOSTNAME = 'localhost'
 VIRTUAL_HOST = '/'
 MQ_TYPE = 'amqp'
 
-# settings for AMQP
 EXCHANGE_TYPE = 'direct'
 
 
 def get_connection():
+    '''
+    Initiate connection with the RabbitMQ server.
+    '''
     backend = config.get('ckan.harvest.mq.type', MQ_TYPE)
-    if backend in ('amqp', 'ampq'):  # "ampq" is for compat with old typo
-        return get_connection_amqp()
+    if backend in ('amqp', 'ampq'):  # "ampq" is for compat with old typo    
+        try:
+            port = int(config.get('ckan.harvest.mq.port', PORT))
+        except ValueError:
+            port = PORT
+        
+        # RabbitMQ server username
+        userid = config.get('ckan.harvest.mq.user_id', USERID)
+        # RabbitMQ server user's password
+        password = config.get('ckan.harvest.mq.password', PASSWORD)
+        # RabbitMQ server host 
+        hostname = config.get('ckan.harvest.mq.hostname', HOSTNAME)
+        # RabbitMQ server virtualhost 
+        virtual_host = config.get('ckan.harvest.mq.virtual_host', VIRTUAL_HOST)
+    
+        credentials = pika.PlainCredentials(userid, password)
+        parameters = pika.ConnectionParameters(host=hostname,
+                                               port=port,
+                                               virtual_host=virtual_host,
+                                               credentials=credentials,
+                                               frame_max=10000)
+        log.debug("pika connection using %s" % parameters.__dict__)
+    
+        return pika.BlockingConnection(parameters)
     raise Exception('not a valid queue type %s' % backend)
 
-def get_connection_amqp():
-    try:
-        port = int(config.get('ckan.harvest.mq.port', PORT))
-    except ValueError:
-        port = PORT
-    userid = config.get('ckan.harvest.mq.user_id', USERID)
-    password = config.get('ckan.harvest.mq.password', PASSWORD)
-    hostname = config.get('ckan.harvest.mq.hostname', HOSTNAME)
-    virtual_host = config.get('ckan.harvest.mq.virtual_host', VIRTUAL_HOST)
-
-    credentials = pika.PlainCredentials(userid, password)
-    parameters = pika.ConnectionParameters(host=hostname,
-                                           port=port,
-                                           virtual_host=virtual_host,
-                                           credentials=credentials,
-                                           frame_max=10000)
-    log.debug("pika connection using %s" % parameters.__dict__)
-
-    return pika.BlockingConnection(parameters)
 
 
 def purge_distributed_queues(gather_queue_name, fetch_queue_name):
-
+    '''
+    Purges given persistent queues.
+    
+    @param gather_queue_name    name of the gather queue
+    @param fetch_queue_name     name of the fetch queue
+    '''
     backend = config.get('ckan.harvest.mq.type', MQ_TYPE)
     connection = get_connection()
     if backend in ('amqp', 'ampq'):
@@ -65,15 +75,30 @@ def purge_distributed_queues(gather_queue_name, fetch_queue_name):
         channel.queue_purge(queue=gather_queue_name)
         channel.queue_purge(queue=fetch_queue_name)
         return
+    raise Exception('not a valid queue type %s' % backend)
 
     
 class Publisher(object):
+    '''
+    Constructor. Initiate connection with the RabbitMQ server.
+
+    @param exchange    name of the exchange to send messages to
+    @param connection  connection to the RabbitMQ server 
+    @param channel     connection to the RabbitMQ server
+    @param routing_key message routing key
+    '''
     def __init__(self, connection, channel, exchange, routing_key):
         self.connection = connection
         self.channel = channel
         self.exchange = exchange
         self.routing_key = routing_key
+
     def send(self, body, **kw):
+        '''
+        Publish message to exchange using routing key
+    
+        @param body        message to publish
+        '''
         return self.channel.basic_publish(self.exchange,
                                           self.routing_key,
                                           json.dumps(body),
@@ -82,10 +107,20 @@ class Publisher(object):
                                           ),
                                           **kw)
     def close(self):
+        '''
+        Close connection.
+        '''
         self.connection.close()
 
 
+
 def get_publisher(exchange_name, routing_key):
+    '''
+    Returns a publisher object.
+    
+    @param exchange    name of the exchange to send messages to
+    @param routing_key message routing key    
+    '''
     connection = get_connection()
     backend = config.get('ckan.harvest.mq.type', MQ_TYPE)
     if backend in ('amqp', 'ampq'):
@@ -95,6 +130,7 @@ def get_publisher(exchange_name, routing_key):
                          channel,
                          exchange_name,
                          routing_key=routing_key)
+    raise Exception('not a valid queue type %s' % backend)
 
 
 class FakeMethod(object):
@@ -103,7 +139,13 @@ class FakeMethod(object):
         self.delivery_tag = message
 
 def get_consumer(exchange_name, queue_name, routing_key):
-
+    '''
+    Returns a reference to a RabbitMQ server channel.
+    
+    @param exchange    name of the exchange to send messages to
+    @param queue_key   name of the queue to receive messages from    
+    @param routing_key message routing key
+    '''
     connection = get_connection()
     backend = config.get('ckan.harvest.mq.type', MQ_TYPE)
 
@@ -113,9 +155,12 @@ def get_consumer(exchange_name, queue_name, routing_key):
         channel.queue_declare(queue=queue_name, durable=True)
         channel.queue_bind(queue=queue_name, exchange=exchange_name, routing_key=routing_key)
         return channel
-  
+    raise Exception('not a valid queue type %s' % backend)
+
+
 
 def distributed_gather_callback(channel, method, header, body):
+    '''Executes gather stage of each harvester.'''
     try:
         id = json.loads(body)['harvest_job_id']
         exchange_name = json.loads(body)['exchange_name']
@@ -192,6 +237,7 @@ def distributed_gather_callback(channel, method, header, body):
 
 
 def distributed_fetch_callback(channel, method, header, body):
+    '''Executes fetch stage of each harvester.'''
     try:
         id = json.loads(body)['harvest_object_id']
         log.info('Received harvest object id: %s' % id)
@@ -265,18 +311,46 @@ def fetch_and_import_stages(harvester, obj):
     obj.save()
 
 def get_distributed_gather_consumer(exchange_name, queue_name, routing_key):
+    '''
+    Initiate connection with the RabbitMQ server for the the gather consumer.
+    
+    @param exchange    name of the exchange to send messages to
+    @param queue_key   name of the queue to receive messages from    
+    @param routing_key message routing key
+    '''
     consumer = get_consumer(exchange_name, queue_name, routing_key)
     log.debug('Gather queue consumer registered')
     return consumer
 
+
 def get_distributed_fetch_consumer(exchange_name, queue_name, routing_key):
+    '''
+    Initiate connection with the RabbitMQ server for the the fetch consumer.
+    
+    @param exchange    name of the exchange to send messages to
+    @param queue_key   name of the queue to receive messages from    
+    @param routing_key message routing key
+    '''
     consumer = get_consumer(exchange_name, queue_name,routing_key)
     log.debug('Fetch queue consumer registered')
     return consumer
 
+
 def get_distributed_gather_publisher(exchange_name, routing_key):
+    '''
+    Initiate connection with the RabbitMQ server for the the gather publisher.
+    
+    @param exchange    name of the exchange to send messages to
+    @param routing_key message routing key
+    '''
     return get_publisher(exchange_name, routing_key)
 
 def get_distributed_fetch_publisher(exchange_name, routing_key):
+    '''
+    Initiate connection with the RabbitMQ server for the the fetch publisher.
+    
+    @param exchange    name of the exchange to send messages to
+    @param routing_key message routing key
+    '''
     return get_publisher(exchange_name, routing_key)
 

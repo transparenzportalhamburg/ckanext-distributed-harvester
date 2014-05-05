@@ -20,24 +20,21 @@ log = getLogger(__name__)
 assert not log.disabled
 
 
-class DistributedHarvest(p.SingletonPlugin, DefaultDatasetForm):
+class DistributedHarvest(p.SingletonPlugin):
 
     p.implements(p.IActions)
     p.implements(p.IAuthFunctions)
 
-    startup = False
 
     ## IActions
-
     def get_actions(self):
-
         module_root = 'ckanext.distributedharvest.logic.action'
         action_functions = _get_logic_functions(module_root)
 
         return action_functions
 
-    ## IAuthFunctions
 
+    ## IAuthFunctions
     def get_auth_functions(self):
 
         module_root = 'ckanext.distributedharvest.logic.auth'
@@ -55,7 +52,7 @@ def _get_logic_functions(module_root, logic_functions = {}):
             module = __import__(module_path)
         except ImportError:
             log.debug('No auth module for action "{0}"'.format(module_name))
-            continue
+            
 
         for part in module_path.split('.')[1:]:
             module = getattr(module, part)
@@ -65,5 +62,5 @@ def _get_logic_functions(module_root, logic_functions = {}):
                         and (value.__module__ == module_path)):
                 logic_functions[key] = value
 
-    return logic_functions
+        return logic_functions
 
