@@ -59,22 +59,22 @@ Kommandozeilenbefehle
 Die folgenden Befehle koennen von der Kommandozeile unter vorhergehenden Angabe von 
 `paster --plugin=ckanext-distributedharvest distributed-harvester` ausgefuehrt werden::
 
-      1. distributed-harvester run_distributed_harvester {source-id} {harvester-titel} | {source-id} {gather-routing-key} {fetch-routing-key}
+      1. run_distributed_harvester {source-id} {harvester-titel} | {source-id} {gather-routing-key} {fetch-routing-key}
         - startet parallele Harvester-Jobs mit generierten Namen (aus harvester-titel) oder mit uebergebenen Bezeichnern
         - bis auf exchange-name sind alle Parameter Pflichtangaben
 
 
-      2. distributed-harvester distributed_gather_consumer {harvester-titel} | {gather-queue-name} {gather-routing-key} {exchange-name}
+      2. distributed_gather_consumer {harvester-titel} | {gather-queue-name} {gather-routing-key} {exchange-name}
         - startet parallele Gather-Konsumenten mit generierten Namen (aus harvester-titel) oder mit uebergebenen Bezeichnern
         - bis auf exchange-name sind alle Parameter Pflichtangaben
           
           
-      3. distributed-harvester distributed_fetch_consumer {harvester-titel} | {fetch-queue-name} {fetch-routing-key} {exchange-name}
+      3. distributed_fetch_consumer {harvester-titel} | {fetch-queue-name} {fetch-routing-key} {exchange-name}
         - startet parallele Fetch-Konsumenten mit generierten Namen (aus harvester-titel) oder mit uebergebenen Bezeichnern
         - bis auf exchange-name sind alle Parameter Pflichtangaben
          
 
-      4. distributed-harvester purge_queues {harvester-titel} | {gather-queue-name} {fetch-queue-name}
+      4. purge_queues {harvester-titel} | {gather-queue-name} {fetch-queue-name}
         - entfernt alle Jobs und Harvest-Objekte von der Gather-Queue und der Fetch-Queue
         - falls harvester-titel gegeben ist, werden die Namen fuer die erforderlichen Queues daraus gebildet oder sie
           koennen direkt uebergeben werden
@@ -122,7 +122,7 @@ in neunen Konsolen ausgefuehrt werden, damit diese verteilt verarbeitet werden k
 
 
 Ueber dieselben Kommandos lassen sich auch die jeweiligen Konsumenten mit individuellen 
-Namen für die einzelnen Queues, Routing-Keys und Exchanges definieren::
+Namen fÃ¼r die einzelnen Queues, Routing-Keys und Exchanges definieren::
       paster --plugin=ckanext-distributedharvest distributed-harvester distributed_gather_consumer gather_queue_harvesterTest gather_routing_key_harvesterTest --config=development.ini
       paster --plugin=ckanext-distributedharvest distributed-harvester distributed_fetch_consumer fetch_queue_harvesterTest fetch_routing_key_harvesterTest --config=development.ini
       paster --plugin=ckanext-distributedharvest distributed-harvester run_distributed_harvester sourcetest gather_routing_key_harvesterTest fetch_routing_key_harvesterTest --config=development.ini
@@ -136,9 +136,3 @@ durch ein Run-Kommando mit demselben Bezeichner ausgefuehrt werden::
       paster --plugin=ckanext-distributedharvest distributed-harvester run_distributed_harvester sourcetest2 harvesterTest --config=development.ini
       paster --plugin=ckanext-distributedharvest distributed-harvester run_distributed_harvester sourcetest3 harvesterTest --config=development.ini
       ...
- 
-
-
-
-
-
