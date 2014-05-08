@@ -83,7 +83,7 @@ Die folgenden Befehle koennen von der Kommandozeile unter vorhergehenden Angabe 
      Diese Kommandos koennen direkt vom Verzeichnis `ckanext-distributedharvest` 
      ausgefuehrt werden.
      
-      paster distributed-harvester run_distributed_harvester #1234 test-titel --config=../ckan/development.ini
+      paster --plugin=ckanext-distributedharvest distributed-harvester run_distributed_harvester #1234 test-titel --config=../ckan/development.ini
 
 
 
