@@ -23,8 +23,8 @@ Installation
        
      Installation von ckanext-harvest::
    
-        (pyenv) $ pip install -e git+https://github.com/okfn/ckanext-harvest.git@release-v2.0#egg=ckanext-harvest
-        
+        (pyenv) $ pip install -e git+https://race.informatik.uni-hamburg.de/inforeggroup/ckanext-distributed-harvester.git#egg=ckanext-distributed-harvester
+
      Installation der restlichen Python-Module, die fuer das Plugin erforderlich sind::
    
         (pyenv) $ pip install -r pip-requirements.txt
