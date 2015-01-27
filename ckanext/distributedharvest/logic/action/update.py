@@ -28,50 +28,10 @@ from ckanext.harvest.model import HarvestSource, HarvestJob, HarvestObject
 from ckanext.harvest.logic import HarvestJobExists
 
 from ckanext.harvest.logic.action.get import harvest_source_show, harvest_job_list, _get_sources_for_user
+from ckanext.harvest.logic.action.update import _caluclate_next_run, _make_scheduled_jobs
 
 log = logging.getLogger(__name__)
 
-
-def _caluclate_next_run(frequency):
-
-    now = datetime.datetime.utcnow()
-    if frequency == 'ALWAYS':
-        return now
-    if frequency == 'WEEKLY':
-        return now + datetime.timedelta(weeks=1)
-    if frequency == 'BIWEEKLY':
-        return now + datetime.timedelta(weeks=2)
-    if frequency == 'DAILY':
-        return now + datetime.timedelta(days=1)
-    if frequency == 'MONTHLY':
-        if now.month in (4,6,9,11):
-            days = 30
-        elif now.month == 2:
-            if now.year % 4 == 0:
-                days = 29
-            else:
-                days = 28
-        else:
-            days = 31
-        return now + datetime.timedelta(days=days)
-    raise Exception('Frequency {freq} not recognised'.format(freq=frequency))
-
-
-def _make_scheduled_jobs(context, data_dict):
-
-    data_dict = {'only_to_run': True,
-                 'only_active': True}
-    sources = _get_sources_for_user(context, data_dict)
-
-    for source in sources:
-        data_dict = {'source_id': source.id}
-        try:
-            get_action('harvest_job_create')(context, data_dict)
-        except HarvestJobExists, e:
-            log.info('Trying to rerun job for %s skipping' % source.id)
-
-        source.next_run = _caluclate_next_run(source.frequency)
-        source.save()
 
 
 def distributed_harvest_jobs_run(context,data_dict):
@@ -86,7 +46,6 @@ def distributed_harvest_jobs_run(context,data_dict):
     exchange_name = data_dict.get('exchange_name',None)
     fetch_routing_key = data_dict.get('fetch_routing_key',None)
     
-
 
     if not source_id:
         _make_scheduled_jobs(context, data_dict)
@@ -156,4 +115,19 @@ def distributed_harvest_jobs_run(context,data_dict):
 
     publisher.close()
     return sent_jobs
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

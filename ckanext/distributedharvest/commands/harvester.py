@@ -28,9 +28,6 @@ class DistributedHarvester(CkanCommand):
       The commands should be run from the ckanext-distributedharvest directory and expect
       a development.ini file to be present. The option ckan.harvest.mq.type needs to be 
       declared with amqp. 
-      Most of the time you will specify the config explicitly though::
-
-        paster distributed-harvester sources --config=../ckan/development.ini
 
     '''
     
@@ -131,7 +128,8 @@ class DistributedHarvester(CkanCommand):
 
         import logging
         logging.getLogger('amqplib').setLevel(logging.INFO)
-        from ckanext.distributedharvest.queue import get_distributed_fetch_consumer, distributed_fetch_callback
+        from ckanext.distributedharvest.queue import get_distributed_fetch_consumer
+        from ckanext.harvest.queue import fetch_callback as distributed_fetch_callback
         consumer = get_distributed_fetch_consumer(exchange_name, fetch_queue_name, fetch_routing_key)
         consumer.basic_consume(distributed_fetch_callback, queue=fetch_queue_name, no_ack=False)
         consumer.start_consuming()
@@ -182,3 +180,7 @@ class DistributedHarvester(CkanCommand):
 
 
   
+
+
+
+
