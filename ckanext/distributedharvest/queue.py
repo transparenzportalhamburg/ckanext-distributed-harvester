@@ -20,16 +20,7 @@ __all__ = ['get_distributed_gather_publisher', 'get_distributed_gather_consumer'
            'get_distributed_fetch_publisher', 'get_distributed_fetch_consumer']
 
 
-PORT = 5672
-USERID = 'guest'
-PASSWORD = 'guest'
-HOSTNAME = 'localhost'
-VIRTUAL_HOST = '/'
 MQ_TYPE = 'amqp'
-
-EXCHANGE_TYPE = 'direct'
-
-
 
 def purge_distributed_queues(gather_queue_name, fetch_queue_name):
     '''
