@@ -98,17 +98,18 @@ Finally, on a third console, run the following command to start a harvesting job
 
 For all other harvest sources, you will need to run these commands (with a new name for ``harvesterTest``) 
 in other consoles in order to execute harvesting jobs in parallel processes.
+
 |
-|
+
 All necessary routing keys, queues and exchanges will be generated during the execution of the harvesting jobs. However, you
-are free to run these commands with other parameters and define your own names for themn::
+are free to run these commands with other parameters and define your own names for them::
 
       paster --plugin=ckanext-distributed-harvest distributed-harvester distributed_gather_consumer gather_queue_harvesterTest gather_routing_key_harvesterTest exchange-name --config=development.ini
       paster --plugin=ckanext-distributed-harvest distributed-harvester distributed_fetch_consumer fetch_queue_harvesterTest fetch_routing_key_harvesterTest exchange-name --config=development.ini
       paster --plugin=ckanext-distributed-harvest distributed-harvester run_distributed_harvester sourcetest gather_routing_key_harvesterTest fetch_routing_key_harvesterTest exchange-name --config=development.ini
   
 
-If you use for several/ various harvest sources the same queue names and routing keys, the harvesting jobs will be 
+If you use for various harvest sources the same queue names and routing keys, the harvesting jobs will be 
 processed sequentially::
 
       paster --plugin=ckanext-distributed-harvest distributed-harvester run_distributed_harvester sourcetest2 harvesterTest --config=development.ini
@@ -226,8 +227,9 @@ In einer weiteren Konsole den Run-Befehl ausfuehren::
 
 Fuer alle anderen Harvester muessen diese Kommandos (mit neuem Namen fuer ``harvesterTest``) 
 in neunen Konsolen ausgefuehrt werden, damit diese verteilt verarbeitet werden koennen.
+
 |
-|
+
 Ueber dieselben Kommandos lassen sich auch die jeweiligen Konsumenten mit individuellen 
 Namen für die einzelnen Queues, Routing-Keys und Exchanges definieren::
       paster --plugin=ckanext-distributedharvest distributed-harvester distributed_gather_consumer gather_queue_harvesterTest gather_routing_key_harvesterTest exchange-name --config=development.ini
