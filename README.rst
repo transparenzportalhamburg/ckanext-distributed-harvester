@@ -74,7 +74,7 @@ Authorization
 =============
 |
 The plugin ckanext-distributed-harvest uses the same access control mechanisms as ckanext-harvest.
-|
+
 |
 
 Run Harvest Jobs
@@ -201,7 +201,7 @@ Authorization
 |
 Das Plugin ckanext-distributedharvest setzt dieselben Zugriffsabfragen 
 wie ckanext-harvest ein.
-|
+
 |
 
 Harvester-Jobs ausfuehren
