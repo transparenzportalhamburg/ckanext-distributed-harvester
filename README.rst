@@ -5,6 +5,7 @@ ckanext-distributed-harvester - A ckan extension to execute distributed Harvest 
 ====================================================================================
 |
 This extension extends the CKAN plugin ckanext-harvest to support distributed harvesting capabilities.
+
 |
 |
 
@@ -122,13 +123,14 @@ License
 |
 
 German Version:
-|
+
 ==========================================================================================
 ckanext-distributed-harvest - CKAN-Erweiterung zur verteilten Ausfuehrung von Harvest-Jobs
 ==========================================================================================
 |
 Diese Erweiterung erweitert das CKAN-Plugin ckanext-harvest um die Funktionen
 zur parallelen Ausfuehrung von Harvest-Jobs.
+
 |
 |
 
