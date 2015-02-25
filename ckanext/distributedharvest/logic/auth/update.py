@@ -9,7 +9,7 @@ def distributed_harvest_jobs_run(context, data_dict):
         Only sysadmins can do it
     '''
     if not user_is_sysadmin(context):
-        return {'success': False, 'msg': pt._('Only sysadmins can run the pending harvest jobs')}
+        return {'success': False, 'msg': pt._('Only sysadmins can run harvest jobs')}
     else:
         return {'success': True}
 
