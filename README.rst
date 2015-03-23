@@ -75,7 +75,6 @@ Authorization
 |
 The plugin ckanext-distributed-harvest uses the same access control mechanisms as ckanext-harvest.
 
-|
 
 Run Harvest Jobs
 ================
@@ -118,8 +117,13 @@ processed sequentially::
 |
 |     
       
-License
-=======
+Copying and License
+===================
+|
+This material is copyright (c) 2015  Fachliche Leitstelle Transparenzportal, Hamburg, Germany.
+|
+It is open and licensed under the GNU Affero General Public License (AGPL) v3.0 whose full text may be found at:
+http://www.fsf.org/licensing/licenses/agpl-3.0.html
 |
 |
 
@@ -248,6 +252,3 @@ durch ein Run-Kommando mit demselben Bezeichner ausgefuehrt werden::
 |
 |
       
-Lizenz
-======
-|

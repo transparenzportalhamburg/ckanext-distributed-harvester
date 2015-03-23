@@ -4,17 +4,17 @@ import sys, os
 version = '0.1'
 
 setup(
-	name='ckanext-distributedharvest',
+	name='ckanext-distributed-harvest',
 	version=version,
-	description="distributed harvester",
+	description="A ckan extension to execute distributed Harvest jobs",
 	long_description="""\
 	""",
 	classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
 	keywords='',
-	author='Esra',
-	author_email='esra.uenal@fokus.fraunhofer.de',
-	url='',
-	license='',
+	author='Fachliche Leitstelle Transparenzportal, Hamburg, Germany; Esra Uenal FOKUS, Fraunhofer Berlin, Germany',
+	author_email='transparenzportal@kb.hamburg.de',
+	url='http://transparenz.hamburg.de/',
+	license='AGPL',
 	packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
 	namespace_packages=['ckanext', 'ckanext.distributedharvest'],
 	include_package_data=True,
