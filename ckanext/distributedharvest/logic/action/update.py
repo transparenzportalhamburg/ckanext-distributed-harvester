@@ -1,38 +1,18 @@
-import hashlib
 
 import logging
-import datetime
 
-from pylons import config
-from paste.deploy.converters import asbool
 from sqlalchemy import and_
 
 from ckan.lib.search.index import PackageSearchIndex
-from ckan.plugins import PluginImplementations
-from ckan.logic import get_action
-from ckanext.harvest.interfaces import IHarvester
-from ckan.lib.search.common import SearchIndexError, make_connection
-
-
-from ckan.model import Package
 from ckan import logic
-
-from ckan.logic import NotFound, check_access
-
-
+from ckan.logic import check_access
 from ckanext.distributedharvest.queue import get_distributed_gather_publisher
-
 from ckanext.harvest.queue import resubmit_jobs
-
-from ckanext.harvest.model import HarvestSource, HarvestJob, HarvestObject
-from ckanext.harvest.logic import HarvestJobExists
-
-from ckanext.harvest.logic.action.get import harvest_source_show, harvest_job_list, _get_sources_for_user
-from ckanext.harvest.logic.action.update import _caluclate_next_run, _make_scheduled_jobs
+from ckanext.harvest.model import HarvestJob, HarvestObject
+from ckanext.harvest.logic.action.get import harvest_source_show, harvest_job_list
+from ckanext.harvest.logic.action.update import _make_scheduled_jobs
 
 log = logging.getLogger(__name__)
-
-
 
 def distributed_harvest_jobs_run(context,data_dict):
     log.info('Harvest job run: %r', data_dict)
@@ -53,20 +33,20 @@ def distributed_harvest_jobs_run(context,data_dict):
     context['return_objects'] = False
 
     # Flag finished jobs as such
-    jobs = harvest_job_list(context,{'source_id':source_id,'status':u'Running'})
+    jobs = harvest_job_list(context,{'source_id':source_id,'status':'Running'})
     if len(jobs):
         package_index = PackageSearchIndex()
         for job in jobs:
             if job['gather_finished']:
                 objects = session.query(HarvestObject.id) \
                           .filter(HarvestObject.harvest_job_id==job['id']) \
-                          .filter(and_((HarvestObject.state!=u'COMPLETE'),
-                                       (HarvestObject.state!=u'ERROR'))) \
+                          .filter(and_((HarvestObject.state!='COMPLETE'),
+                                       (HarvestObject.state!='ERROR'))) \
                           .order_by(HarvestObject.import_finished.desc())
 
                 if objects.count() == 0:
                     job_obj = HarvestJob.get(job['id'])
-                    job_obj.status = u'Finished'
+                    job_obj.status = 'Finished'
 
                     last_object = session.query(HarvestObject) \
                           .filter(HarvestObject.harvest_job_id==job['id']) \
@@ -91,7 +71,7 @@ def distributed_harvest_jobs_run(context,data_dict):
     resubmit_jobs()
 
     # Check if there are pending harvest jobs
-    jobs = harvest_job_list(context,{'source_id':source_id,'status':u'New'})
+    jobs = harvest_job_list(context,{'source_id':source_id,'status':'New'})
     if len(jobs) == 0:
         log.info('No new harvest jobs.')
         raise Exception('There are no new harvesting jobs')
@@ -104,7 +84,7 @@ def distributed_harvest_jobs_run(context,data_dict):
         source = harvest_source_show(context,{'id':job['source_id']})
         if source['active']:
             job_obj = HarvestJob.get(job['id'])
-            job_obj.status = job['status'] = u'Running'
+            job_obj.status = job['status'] = 'Running'
             job_obj.save()
             publisher.send({'harvest_job_id': job['id'],
                             'exchange_name': exchange_name,

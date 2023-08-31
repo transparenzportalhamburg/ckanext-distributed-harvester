@@ -1,7 +1,5 @@
 from setuptools import setup, find_packages
-import sys, os
-
-version = '0.1'
+version = '3.7'
 
 setup(
 	name='ckanext-distributed-harvest',
@@ -25,10 +23,6 @@ setup(
 	entry_points=\
 	"""
         [ckan.plugins] 
-        distributed_harvest=ckanext.distributedharvest.plugin:DistributedHarvest
-		
-		[paste.paster_command]
-		distributed-harvester = ckanext.distributedharvest.commands.harvester:DistributedHarvester
-
+			distributed_harvest=ckanext.distributedharvest.plugin:DistributedHarvest
 	""",
 )

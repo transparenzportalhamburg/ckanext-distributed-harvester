@@ -24,7 +24,7 @@ Plugin Installation
        
      To install it, run::
    
-        (pyenv) $ pip install -e git+https://race.informatik.uni-hamburg.de/inforeggroup/ckanext-distributed-harvester.git#egg=ckanext-distributed-harvester
+        (pyenv) $ pip install -e git+https://github.com/transparenzportalhamburg/inforeggroup/ckanext-distributed-harvester.git#egg=ckanext-distributed-harvester
        
      Install the rest of python modules required by the extension::
    

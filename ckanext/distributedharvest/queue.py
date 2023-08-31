@@ -3,35 +3,41 @@ import datetime
 import json
 
 import pika
-
+import threading
 from ckan.lib.base import config
 from ckan.plugins import PluginImplementations
 from ckan import model
 
-from ckanext.harvest.model import HarvestJob, HarvestObject,HarvestGatherError
+from ckanext.harvest.model import HarvestJob, HarvestObject, HarvestGatherError
 from ckanext.harvest.interfaces import IHarvester
 from ckanext.harvest.queue import get_connection_amqp as get_connection
 from ckanext.harvest.queue import Publisher
 
+
 log = logging.getLogger(__name__)
 assert not log.disabled
 
-__all__ = ['get_distributed_gather_publisher', 'get_distributed_gather_consumer', \
+__all__ = ['get_distributed_gather_publisher', 'get_distributed_gather_consumer',
            'get_distributed_fetch_publisher', 'get_distributed_fetch_consumer']
 
 
 MQ_TYPE = 'amqp'
 
+
+def is_amqp(backend):
+    return backend in ('amqp', 'ampq')
+
+
 def purge_distributed_queues(gather_queue_name, fetch_queue_name):
     '''
     Purges given persistent queues.
-    
+
     @param gather_queue_name    name of the gather queue
     @param fetch_queue_name     name of the fetch queue
     '''
     backend = config.get('ckan.harvest.mq.type', MQ_TYPE)
     connection = get_connection()
-    if backend in ('amqp', 'ampq'):
+    if is_amqp(backend):
         channel = connection.channel()
         channel.queue_purge(queue=gather_queue_name)
         channel.queue_purge(queue=fetch_queue_name)
@@ -39,17 +45,17 @@ def purge_distributed_queues(gather_queue_name, fetch_queue_name):
     raise Exception('not a valid queue type %s' % backend)
 
 
-
 def get_publisher(exchange_name, routing_key):
     '''
     Returns a publisher object.
-    
+
     @param exchange    name of the exchange to send messages to
     @param routing_key message routing key    
     '''
     connection = get_connection()
     backend = config.get('ckan.harvest.mq.type', MQ_TYPE)
-    if backend in ('amqp', 'ampq'):
+
+    if is_amqp(backend):
         channel = connection.channel()
         channel.exchange_declare(exchange=exchange_name, durable=True)
         return Publisher(connection,
@@ -59,11 +65,10 @@ def get_publisher(exchange_name, routing_key):
     raise Exception('not a valid queue type %s' % backend)
 
 
-
 def get_consumer(exchange_name, queue_name, routing_key):
     '''
     Returns a reference to a RabbitMQ server channel.
-    
+
     @param exchange    name of the exchange to send messages to
     @param queue_key   name of the queue to receive messages from    
     @param routing_key message routing key
@@ -71,14 +76,14 @@ def get_consumer(exchange_name, queue_name, routing_key):
     connection = get_connection()
     backend = config.get('ckan.harvest.mq.type', MQ_TYPE)
 
-    if backend in ('amqp', 'ampq'):
+    if is_amqp(backend):
         channel = connection.channel()
         channel.exchange_declare(exchange=exchange_name, durable=True)
         channel.queue_declare(queue=queue_name, durable=True)
         channel.queue_bind(queue=queue_name, exchange=exchange_name, routing_key=routing_key)
+        
         return channel
     raise Exception('not a valid queue type %s' % backend)
-
 
 
 def distributed_gather_callback(channel, method, header, body):
@@ -94,7 +99,8 @@ def distributed_gather_callback(channel, method, header, body):
         return False
 
     # Get a publisher for the fetch queue
-    publisher = get_distributed_fetch_publisher(exchange_name, fetch_routing_key)
+    publisher = get_distributed_fetch_publisher(
+        exchange_name, fetch_routing_key)
 
     job = HarvestJob.get(id)
 
@@ -141,15 +147,16 @@ def distributed_gather_callback(channel, method, header, body):
                 return False
 
             log.debug('Received from plugin gather_stage: {0} objects (first: {1} last: {2})'.format(
-                        len(harvest_object_ids), harvest_object_ids[:1], harvest_object_ids[-1:]))
+                len(harvest_object_ids), harvest_object_ids[:1], harvest_object_ids[-1:]))
             for id in harvest_object_ids:
                 # Send the id to the fetch queue
-                publisher.send({'harvest_object_id':id})
-            log.debug('Sent {0} objects to the fetch queue'.format(len(harvest_object_ids)))
+                publisher.send({'harvest_object_id': id})
+            log.debug('Sent {0} objects to the fetch queue'.format(
+                len(harvest_object_ids)))
 
     if not harvester_found:
         msg = 'No harvester could be found for source type %s' % job.source.type
-        err = HarvestGatherError(message=msg,job=job)
+        err = HarvestGatherError(message=msg, job=job)
         err.save()
         log.error(msg)
 
@@ -161,7 +168,7 @@ def distributed_gather_callback(channel, method, header, body):
 def get_distributed_gather_consumer(exchange_name, queue_name, routing_key):
     '''
     Initiate connection with the RabbitMQ server for the the gather consumer.
-    
+
     @param exchange    name of the exchange to send messages to
     @param queue_key   name of the queue to receive messages from    
     @param routing_key message routing key
@@ -174,12 +181,12 @@ def get_distributed_gather_consumer(exchange_name, queue_name, routing_key):
 def get_distributed_fetch_consumer(exchange_name, queue_name, routing_key):
     '''
     Initiate connection with the RabbitMQ server for the the fetch consumer.
-    
+
     @param exchange    name of the exchange to send messages to
     @param queue_key   name of the queue to receive messages from    
     @param routing_key message routing key
     '''
-    consumer = get_consumer(exchange_name, queue_name,routing_key)
+    consumer = get_consumer(exchange_name, queue_name, routing_key)
     log.debug('Fetch queue consumer registered')
     return consumer
 
@@ -187,44 +194,18 @@ def get_distributed_fetch_consumer(exchange_name, queue_name, routing_key):
 def get_distributed_gather_publisher(exchange_name, routing_key):
     '''
     Initiate connection with the RabbitMQ server for the the gather publisher.
-    
+
     @param exchange    name of the exchange to send messages to
     @param routing_key message routing key
     '''
     return get_publisher(exchange_name, routing_key)
+
 
 def get_distributed_fetch_publisher(exchange_name, routing_key):
     '''
     Initiate connection with the RabbitMQ server for the the fetch publisher.
-    
+
     @param exchange    name of the exchange to send messages to
     @param routing_key message routing key
     '''
     return get_publisher(exchange_name, routing_key)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

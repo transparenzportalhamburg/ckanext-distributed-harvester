@@ -3,3 +3,8 @@ syntax: glob
 *.egg-info
 *.swp
 *~
+build/
+dist/
+.settings
+.vscode
+.pytest_cache
